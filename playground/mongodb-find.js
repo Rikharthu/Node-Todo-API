@@ -39,7 +39,7 @@ MongoClient.connect(databaseUrl, (err, db) => {
     db.collection('Todos')
         .find({
             // _id is not a string, it's an object
-            _id: ObjectID("5a26ebeb1ce9213538842f35")
+            _id: new ObjectID("5a26ebeb1ce9213538842f35")
         })
         .toArray()
         .then((docs) => {
