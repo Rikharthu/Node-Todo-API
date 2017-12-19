@@ -31,8 +31,23 @@ app.post('/todos', (req, res) => {
     });
 });
 
+// GET /todos
+app.get('/todos', (req, res) => {
+    Todo.find().then((todos) => {
+        res.send({
+            todos,
+            code: 'Success'
+        })
+    }, (e) => {
+        console.error(e);
+        res.status(400).send(e);
+    });
+});
+
 app.listen(3000, () => {
     console.log('Started on port 3000');
 });
 
-module.exports = { app };
+module.exports = {
+    app
+};
