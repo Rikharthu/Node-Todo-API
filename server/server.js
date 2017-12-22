@@ -63,9 +63,9 @@ app.get('/todos/:id', (req, res) => {
                     todo
                 });
             }
-            res.status(404).send({});
+            res.status(404).send();
         }).catch(err => {
-            return res.status(400).send({});
+            return res.status(400).send();
         });
 });
 
@@ -81,7 +81,7 @@ app.delete('/todos/:id', (req, res) => {
                 todo
             });
         }
-        res.status(404).send({});
+        res.status(404).send();
     });
 });
 
