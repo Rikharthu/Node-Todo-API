@@ -1,8 +1,9 @@
 const {
     ObjectID
 } = require('mongodb');
-var express = require('express');
-var bodyParser = require('body-parser');
+const _ = require('lodash');
+const express = require('express');
+const bodyParser = require('body-parser');
 
 var {
     mongoose
@@ -83,6 +84,43 @@ app.delete('/todos/:id', (req, res) => {
         }
         res.status(404).send();
     });
+});
+
+// PATCH
+app.patch('todos/:id', (req, res) => {
+    var id = req.params.id;
+    // select only properties that user is allowed to update
+    // e.g. we do not want user to update the 'completedAt' property
+    var body = _.pick(req.body, ['text', 'completed']);
+
+    if (!ObjectID.isValid(id)) {
+        return res.status(404).send({});
+    }
+
+    if (_.isBoolean(body.completed) && body.completed) {
+        body.completedAt = new Date().getTime();
+    } else {
+        body.completed = false;
+        body.completedAt = null;
+    }
+
+    Todo.findByIdAndUpdate(id, {
+            $set: body
+        }, {
+            new: true
+        })
+        .then((todo) => {
+            if (!todo) {
+                return res.status(404).send();
+            }
+
+            res.status.send({
+                todo
+            });
+        })
+        .catch((err) => {
+            res.status(400).send();
+        });
 });
 
 app.listen(port, () => {
