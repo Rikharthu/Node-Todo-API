@@ -1,3 +1,16 @@
+var env = process.env.NODE_ENV; // provided by heroky environment variables or our custom configurations (see package.json test command)
+console.log(`Environment is [${env}]`);
+
+// Configure parameters depending on current environment
+// NODE_ENV is 'production' in heroku by default
+if (env == 'development') {
+    process.env.PORT = 3000;
+    process.env.MONGODB_URI = 'mongodb://localhost:27017/TodoApp';
+} else if (env == 'test') {
+    process.env.PORT = 3000;
+    process.env.MONGODB_URI = 'mongodb://localhost:27017/TodoAppTest';
+}
+
 const {
     ObjectID
 } = require('mongodb');
@@ -17,7 +30,7 @@ var {
 
 
 var app = express();
-const port = process.env.PORT || 3000;
+// const port = process.env.PORT || 3000;
 
 // Configure Middleware
 app.use(bodyParser.json());
@@ -124,7 +137,7 @@ app.patch('/todos/:id', (req, res) => {
         });
 });
 
-app.listen(port, () => {
+app.listen(process.env.PORT, () => {
     console.log('Started on port 3000');
 });
 
