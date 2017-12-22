@@ -87,13 +87,14 @@ app.delete('/todos/:id', (req, res) => {
 });
 
 // PATCH
-app.patch('todos/:id', (req, res) => {
+app.patch('/todos/:id', (req, res) => {
     var id = req.params.id;
     // select only properties that user is allowed to update
     // e.g. we do not want user to update the 'completedAt' property
     var body = _.pick(req.body, ['text', 'completed']);
-
+    console.log(body)
     if (!ObjectID.isValid(id)) {
+
         return res.status(404).send({});
     }
 
@@ -114,7 +115,7 @@ app.patch('todos/:id', (req, res) => {
                 return res.status(404).send();
             }
 
-            res.status.send({
+            res.status(200).send({
                 todo
             });
         })
