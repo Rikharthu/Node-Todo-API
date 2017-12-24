@@ -27,6 +27,9 @@ var {
 var {
     User
 } = require('./models/user');
+var {
+    authenticate
+} = require('./middleware/authenticate');
 
 
 var app = express();
@@ -138,6 +141,7 @@ app.patch('/todos/:id', (req, res) => {
 });
 
 // POST /users
+// Signup
 app.post('/users', (req, res) => {
     var body = _.pick(req.body, ['email', 'password']);
     var user = new User(body);
@@ -153,6 +157,30 @@ app.post('/users', (req, res) => {
             res.status(400).send(err);
         });
 });
+
+// we are using 'authentice' middleware for this request
+app.get('/users/me', authenticate, (req, res) => {
+    res.send(req.user);
+});
+
+// GET /users/me
+// Returns user info based on passed 'auth' token
+/*
+app.get('/users/me', (req, res) => {
+    var token = req.header('x-auth');
+
+    User.findByToken(token).then((user) => {
+            if (!user) {
+                return Promise.reject();
+            }
+
+            res.send(user);
+        })
+        .catch((e) => {
+            res.status(401).send();
+        });
+});
+*/
 
 
 app.listen(process.env.PORT, () => {
