@@ -34,10 +34,10 @@ console.log(resultHash);
 token.data.id = 5;
 // Person in the middle do not have access to our salt
 token.hash = SHA256(JSON.stringify(data)).toString();
-
+console.log(`Fake hash: ${token.hash}`);
 
 if (resultHash === token.hash) {
-    console.log('Data was not changed')
+    console.log('Data was not changed');
 } else {
     console.log('Data was changed. Do not trust!');
 }
