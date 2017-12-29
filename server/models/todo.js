@@ -1,4 +1,4 @@
-var mongoose = require('mongoose')
+var mongoose = require('mongoose');
 
 // Create a mongoose data model so the mongoose knows how to save data
 var Todo = mongoose.model('Todo', {
@@ -15,11 +15,15 @@ var Todo = mongoose.model('Todo', {
     completedAt: {
         type: Number,
         default: null
+    },
+    _creator: {
+        required: true,
+        type: mongoose.Schema.Types.ObjectId
     }
 });
 // More info:
 // http://mongoosejs.com/docs/validation.html
 
-module.exports={
+module.exports = {
     Todo
 };

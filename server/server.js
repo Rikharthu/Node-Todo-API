@@ -1,15 +1,4 @@
-var env = process.env.NODE_ENV; // provided by heroky environment variables or our custom configurations (see package.json test command)
-console.log(`Environment is [${env}]`);
-
-// Configure parameters depending on current environment
-// NODE_ENV is 'production' in heroku by default
-if (env == 'development') {
-    process.env.PORT = 3000;
-    process.env.MONGODB_URI = 'mongodb://localhost:27017/TodoApp';
-} else if (env == 'test') {
-    process.env.PORT = 3000;
-    process.env.MONGODB_URI = 'mongodb://localhost:27017/TodoAppTest';
-}
+require('./../config/config');
 
 const {
     ObjectID
@@ -39,9 +28,10 @@ var app = express();
 app.use(bodyParser.json());
 
 // POST /todos
-app.post('/todos', (req, res) => {
+app.post('/todos', authenticate, (req, res) => {
     var todo = new Todo({
-        text: req.body.text
+        text: req.body.text,
+        _creator: req.user._id
     });
     todo.save().then((doc) => {
         console.log('Saved todo');
@@ -53,27 +43,33 @@ app.post('/todos', (req, res) => {
 });
 
 // GET /todos
-app.get('/todos', (req, res) => {
-    Todo.find().then((todos) => {
-        res.send({
-            todos,
-            code: 'Success'
+app.get('/todos', authenticate, (req, res) => {
+    Todo.find({
+            _creator: req.user._id
         })
-    }, (e) => {
-        console.error(e);
-        res.status(400).send(e);
-    });
+        .then((todos) => {
+            res.send({
+                todos,
+                code: 'Success'
+            })
+        }, (e) => {
+            console.error(e);
+            res.status(400).send(e);
+        });
 });
 
 // Get/todos/12345
-app.get('/todos/:id', (req, res) => {
+app.get('/todos/:id', authenticate, (req, res) => {
     // res.send(req.params);
     var id = req.params.id;
     // 1. Check if ObjectID is valid
     if (!ObjectID.isValid(id)) {
         return res.status(404).send({});
     }
-    Todo.findById(id)
+    Todo.findOne({
+            _id: id,
+            _creator: req.user._id
+        })
         .then((todo) => {
             if (todo) {
                 return res.status(200).send({
@@ -86,24 +82,28 @@ app.get('/todos/:id', (req, res) => {
         });
 });
 
-app.delete('/todos/:id', (req, res) => {
+app.delete('/todos/:id', authenticate, (req, res) => {
     var id = req.params.id;
     if (!ObjectID.isValid(id)) {
         return res.status(404).send({});
     }
 
-    Todo.findByIdAndRemove(id).then((todo) => {
-        if (todo) {
-            return res.status(200).send({
-                todo
-            });
-        }
-        res.status(404).send();
-    });
+    Todo.findOneAndRemove({
+            _id: id,
+            _creator: req.user._id
+        })
+        .then((todo) => {
+            if (todo) {
+                return res.status(200).send({
+                    todo
+                });
+            }
+            res.status(404).send();
+        });
 });
 
 // PATCH
-app.patch('/todos/:id', (req, res) => {
+app.patch('/todos/:id', authenticate, (req, res) => {
     var id = req.params.id;
     // select only properties that user is allowed to update
     // e.g. we do not want user to update the 'completedAt' property
@@ -121,7 +121,10 @@ app.patch('/todos/:id', (req, res) => {
         body.completedAt = null;
     }
 
-    Todo.findByIdAndUpdate(id, {
+    Todo.findOneAndUpdate({
+            _id: id,
+            _creator: req.user._id
+        }, {
             $set: body
         }, {
             new: true

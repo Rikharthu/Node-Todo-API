@@ -70,7 +70,7 @@ UserSchema.methods.generateAuthToken = function () {
     var token = jwt.sign({
         _id: user._id.toHexString(),
         access
-    }, 'abc123').toString();
+    }, process.env.JWT_SECRET).toString();
 
     // Add token to the database
     user.tokens.push({
@@ -82,7 +82,7 @@ UserSchema.methods.generateAuthToken = function () {
     // Return the promise to allow chaining upon it
     return user.save().then(() => {
         return token;
-    })
+    });
 };
 
 UserSchema.methods.removeToken = function (token) {
@@ -103,7 +103,7 @@ UserSchema.statics.findByToken = function (token) {
     var decoded; // decoded jwt values
 
     try {
-        decoded = jwt.verify(token, 'abc123');
+        decoded = jwt.verify(token, process.env.JWT_SECRET);
     } catch (e) {
         // return new Promise((resolve, reject) => {
         //     reject();
