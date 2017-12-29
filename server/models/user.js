@@ -85,6 +85,18 @@ UserSchema.methods.generateAuthToken = function () {
     })
 };
 
+UserSchema.methods.removeToken = function (token) {
+    var user = this;
+
+    return user.update({
+        $pull: {
+            tokens: {
+                token: token
+            }
+        }
+    })
+};
+
 // Module method
 UserSchema.statics.findByToken = function (token) {
     var User = this;
@@ -117,7 +129,11 @@ UserSchema.statics.findByCredentials = function (email, password) {
         }
         return bcrypt.compare(password, user.password)
             .then((res) => {
-                return Promise.resolve(user);
+                if (res) {
+                    return Promise.resolve(user);
+                } else {
+                    return Promise.reject('Passwords do not match');
+                }
             })
             .catch((err) => {
                 return Promise.reject(err);
