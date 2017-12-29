@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "export NODE_ENV=development || SET \"NODE_ENV=development\" && node server/server.js",
+    "start": "node server/server.js",
     "debug": "export NODE_ENV=development || SET \"NODE_ENV=development\" && node server/server.js --inspect",
     "test": "export NODE_ENV=test || SET \"NODE_ENV=test\" && mocha server/**/*.test.js",
     "test-watch": "nodemon --exec npm test"
