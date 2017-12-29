@@ -150,7 +150,7 @@ describe('DELETE /todos/:id', () => {
                 // Check if item is removed from the database
                 Todo.findById(hexId)
                     .then((todo) => {
-                        expect(todo).toNotExist();
+                        expect(todo).toBeFalsy();
                         done();
                     })
                     .catch((err) => done(err));
@@ -203,7 +203,8 @@ describe('PATCH /todos/:id', () => {
             .expect((res) => {
                 expect(res.body.todo.text).toBe(updatedText);
                 expect(res.body.todo.completed).toBe(true);
-                expect(res.body.todo.completedAt).toBeA('number');
+                // expect(res.body.todo.completedAt).toBeA('number');
+                expect(typeof res.body.todo.completedAt).toBe('number');
             })
             .end(done);
     });
@@ -238,7 +239,7 @@ describe('PATCH /todos/:id', () => {
             .expect((res) => {
                 expect(res.body.todo.text).toBe(updatedText);
                 expect(res.body.todo.completed).toBe(false);
-                expect(res.body.todo.completedAt).toNotExist();
+                expect(res.body.todo.completedAt).toBeFalsy();
             })
             .end(done);
     });
@@ -282,8 +283,8 @@ describe('POST /users', () => {
             })
             .expect(200)
             .expect((res) => {
-                expect(res.header['x-auth']).toExist();
-                expect(res.body._id).toExist();
+                expect(res.header['x-auth']).toBeTruthy();
+                expect(res.body._id).toBeTruthy();
                 expect(res.body.email).toBe(email);
             })
             .end((err) => {
@@ -296,9 +297,9 @@ describe('POST /users', () => {
                         email
                     })
                     .then((user) => {
-                        expect(user).toExist();
+                        expect(user).toBeTruthy();
                         // password should have been hashed before saving in to the database
-                        expect(user.password).toNotBe(password);
+                        expect(user.password).not.toBe(password);
                         done();
                     }).catch((err) => done(err));
             });
@@ -336,7 +337,7 @@ describe('POST /users', () => {
                 })
                 .expect(200)
                 .expect((res) => {
-                    expect(res.headers['x-auth']).toExist();
+                    expect(res.headers['x-auth']).toBeTruthy();
                 })
                 .end((err, res) => {
                     if (err) {
@@ -346,7 +347,7 @@ describe('POST /users', () => {
                     // Check if new auth token has been added to the database
                     User.findById(users[1]._id)
                         .then((user) => {
-                            expect(user.tokens[1]).toInclude({
+                            expect(user.toObject().tokens[1]).toMatchObject({
                                 access: 'auth',
                                 token: res.headers['x-auth']
                             });
@@ -367,7 +368,7 @@ describe('POST /users', () => {
                 .expect(400)
                 .expect((res) => {
                     // ensure there is no x-auth token attached
-                    expect(res.headers['x-auth']).toNotExist();
+                    expect(res.headers['x-auth']).toBeFalsy();
                 })
                 .end((err, res) => {
                     if (err) {
